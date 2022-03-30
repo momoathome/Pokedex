@@ -3,7 +3,7 @@
     <div class="grid">
       <Pokemon
         v-for="pokemon in pokemons"
-        :key="pokemon.details.id"
+        :key="pokemon.id"
         :pokemon="pokemon"
         @show-modal-data="showModalData(pokemon)"
       />
@@ -14,6 +14,7 @@
     <modal :show="showModal" @close="showModal = false">
       <template #img>
         <img :src="pokemon.sprites.front_default" class="detail-img" />
+        <img :src="pokemon.sprites.front_shiny" class="detail-img" />
       </template>
       <template #body>
         <div class="poke-details">
@@ -21,7 +22,7 @@
             <ul>
               <li>Name</li>
               <li>No.</li>
-              <li>Type(s)</li>
+              <li>Type's</li>
               <li>Height</li>
               <li>Weight</li>
               <li>Abilities</li>
@@ -68,31 +69,47 @@ export default {
   },
   data: () => ({
     pokemons: [],
-    showModal: false,
     pokemon: [],
+    showModal: false,
     offset: 0,
-    count: 50,
+    count: 150,
     scrollLoad: 50,
   }),
+  watch: {
+    showModal() {
+      this.showModal
+        ? (document.body.style.overflow = 'hidden')
+        : (document.body.style.overflow = 'auto')
+    },
+  },
   methods: {
-    showModalData(pokemonDO) {
+    showModalData(pokemon) {
       this.showModal = true
-      this.pokemon = pokemonDO.details
-      console.log(this.pokemon)
+      this.pokemon = pokemon
     },
     getPokemonNames(count, offset) {
+      if (this.pokemons.length >= 1126) {
+        return
+      }
+
       EventService.getPokemonNames(count, offset)
         .then((response) => {
           const pokemons = response.data.results
-          for (const data of pokemons) {
-            EventService.getPokemonDetails(data.url).then((response) => {
-              const details = response.data
-              const pushPokemonDetails = () => {
-                this.pokemons.push({details})
-              }
-              setTimeout(pushPokemonDetails, 1500)
-            })
+          async function processData() {
+            const pokeDetails = []
+            for (const data of pokemons) {
+              await EventService.getPokemonDetails(data.url).then((response) => {
+                const details = response.data
+                pokeDetails.push(details)
+              })
+            }
+            return pokeDetails.sort((a, b) => a.id - b.id)
           }
+          return processData()
+        })
+        .then((data) => {
+          this.pokemons.push(...data)
+          console.log(this.pokemons)
         })
         .catch((error) => {
           console.log(error)

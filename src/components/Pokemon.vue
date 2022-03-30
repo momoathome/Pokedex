@@ -3,12 +3,11 @@
     <div
       class="rectangle"
       @click="showModal(pokemon)"
-      :class="pokemon.details.types[0].type.name"
-      :style="pokemon.details.types[1] ? createBackgroundString : ''"
+      :style="pokemon.types[1] ? createBackgroundString : createMainBackground"
     >
-      <img :src="pokemon.details.sprites.front_default" class="img" />
+      <img :src="pokemon.sprites.front_default" class="img" />
       <div class="poke-name">
-        <h3>{{ pokemon.details.name }}</h3>
+        <h3>{{ pokemon.name }}</h3>
       </div>
     </div>
   </div>
@@ -43,24 +42,19 @@ export default {
     pokemon: Object,
   },
   methods: {
-    showModal(pokemonDO) {
-      this.$emit('show-modal-data', pokemonDO)
+    showModal(pokemon) {
+      this.$emit('show-modal-data', pokemon)
     },
   },
   computed: {
     createBackgroundString() {
-      const typeColor = []
-      for (const type in this.types) {
-        if (this.pokemon.details.types[0].type.name === type) {
-          typeColor.push(this.types[type])
-        }
-      }
-      for (const type in this.types) {
-        if (this.pokemon.details.types[1].type.name === type) {
-          typeColor.push(this.types[type])
-        }
-      }
-      return `background: linear-gradient(133deg, ${typeColor[0]} 50%, ${typeColor[1]} 50%`
+      const type1 = this.types[this.pokemon.types[0].type.name]
+      const type2 = this.types[this.pokemon.types[1].type.name]
+      return `background: linear-gradient(133deg, ${type1} 50%, ${type2} 50%`
+    },
+    createMainBackground() {
+      const type = this.types[this.pokemon.types[0].type.name]
+      return `background-color: ${type} `
     },
   },
 }
