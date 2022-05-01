@@ -76,7 +76,7 @@ export default {
     pokemons: [],
     pokemon: [],
     showModal: false,
-    count: 150,
+    count: 151,
     scrollLoad: 100,
     search: '',
   }),
