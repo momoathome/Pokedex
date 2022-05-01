@@ -1,14 +1,19 @@
 <template>
-  <div class="container">
+  <main class="container">
+    <label for="pokemon" class="pokemonSearch">
+      <input type="text" id="pokemonSearch" v-model="search" placeholder="&nbsp;" />
+      <span class="label">Search Pokemon</span>
+      <span class="focus-bg"></span>
+    </label>
     <div class="grid">
       <Pokemon
-        v-for="pokemon in pokemons"
+        v-for="pokemon in filteredPokemon"
         :key="pokemon.id"
         :pokemon="pokemon"
         @show-modal-data="showModalData(pokemon)"
       />
     </div>
-  </div>
+  </main>
 
   <Teleport to="body">
     <modal :show="showModal" @close="showModal = false">
@@ -71,17 +76,10 @@ export default {
     pokemons: [],
     pokemon: [],
     showModal: false,
-    offset: 0,
     count: 150,
-    scrollLoad: 50,
+    scrollLoad: 100,
+    search: '',
   }),
-  watch: {
-    showModal() {
-      this.showModal
-        ? (document.body.style.overflow = 'hidden')
-        : (document.body.style.overflow = 'auto')
-    },
-  },
   methods: {
     showModalData(pokemon) {
       this.showModal = true
@@ -95,16 +93,21 @@ export default {
       EventService.getPokemonNames(count, offset)
         .then((response) => {
           const pokemons = response.data.results
+
           async function processData() {
             const pokeDetails = []
+
             for (const data of pokemons) {
               await EventService.getPokemonDetails(data.url).then((response) => {
                 const details = response.data
+
                 pokeDetails.push(details)
               })
             }
+
             return pokeDetails.sort((a, b) => a.id - b.id)
           }
+
           return processData()
         })
         .then((data) => {
@@ -121,10 +124,16 @@ export default {
           document.documentElement.scrollTop + window.innerHeight ===
           document.documentElement.offsetHeight
         if (bottomOfWindow) {
-          this.offset += this.scrollLoad
-          this.getPokemonNames(this.count, this.offset)
+          this.getPokemonNames(this.scrollLoad, this.pokemons.length)
         }
       }
+    },
+  },
+  computed: {
+    filteredPokemon() {
+      return this.pokemons.filter((poke) => {
+        return poke.name.toLowerCase().indexOf(this.search.toLowerCase()) != -1
+      })
     },
   },
   beforeMount() {
@@ -132,6 +141,13 @@ export default {
   },
   mounted() {
     this.getNextPokemons()
+  },
+  watch: {
+    showModal() {
+      this.showModal
+        ? (document.body.style.overflow = 'hidden')
+        : (document.body.style.overflow = 'auto')
+    },
   },
 }
 </script>
@@ -156,5 +172,84 @@ export default {
   align-self: center;
   width: 200px;
   height: 200px;
+}
+
+$primary: #000080;
+$dark: #000;
+
+.pokemonSearch {
+  position: relative;
+  margin: 0 auto 3rem auto;
+  width: 100%;
+  max-width: 500px;
+  border-radius: 3px;
+  overflow: hidden;
+
+  .label {
+    position: absolute;
+    top: 20px;
+    left: 12px;
+    font-size: 16px;
+    color: rgba($dark, 0.5);
+    font-weight: 500;
+    transform-origin: 0 0;
+    transform: translate3d(0, 0, 0);
+    transition: all 0.2s ease;
+    pointer-events: none;
+  }
+
+  .focus-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba($dark, 0.05);
+    z-index: -1;
+    transform: scaleX(0);
+    transform-origin: left;
+  }
+
+  input {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    border: 0;
+    font-family: inherit;
+    padding: 16px 12px 0 12px;
+    height: 56px;
+    font-size: 16px;
+    font-weight: 400;
+    background: rgba($dark, 0.02);
+    box-shadow: inset 0 -1px 0 rgba($dark, 0.3);
+    color: $dark;
+    transition: all 0.15s ease;
+
+    &:hover {
+      background: rgba($dark, 0.04);
+      box-shadow: inset 0 -1px 0 rgba($dark, 0.5);
+    }
+
+    &:not(:placeholder-shown) {
+      .label {
+        color: rgba($dark, 0.5);
+        transform: translate3d(0, -12px, 0) scale(0.75);
+      }
+    }
+
+    &:focus {
+      background: rgba($dark, 0.05);
+      outline: none;
+      box-shadow: inset 0 -2px 0 $primary;
+      + .label {
+        color: $primary;
+        transform: translate3d(0, -12px, 0) scale(0.75);
+      }
+      + .focus-bg {
+        transform: scaleX(1);
+        transition: all 0.1s ease;
+      }
+    }
+  }
 }
 </style>

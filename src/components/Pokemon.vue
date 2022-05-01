@@ -16,6 +16,9 @@
 <script>
 export default {
   name: 'Pokemon',
+  props: {
+    pokemon: Object,
+  },
   data: () => ({
     types: {
       normal: '#A8A77A',
@@ -38,9 +41,6 @@ export default {
       fairy: '#D685AD',
     },
   }),
-  props: {
-    pokemon: Object,
-  },
   methods: {
     showModal(pokemon) {
       this.$emit('show-modal-data', pokemon)
