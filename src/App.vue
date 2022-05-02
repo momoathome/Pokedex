@@ -2,7 +2,7 @@
   <main class="container">
     <label for="pokemon" class="pokemonSearch">
       <input type="text" id="pokemonSearch" v-model="search" placeholder="&nbsp;" />
-      <span class="label">Search Pokemon</span>
+      <span class="label">Search Pokemon ({{ pokemons.length }}) </span>
       <span class="focus-bg"></span>
     </label>
     <div class="grid">
@@ -86,9 +86,9 @@ export default {
       this.pokemon = pokemon
     },
     getPokemonNames(count, offset) {
-      if (this.pokemons.length >= 1126) {
+      /*  if (this.pokemons.length >= 1126) {
         return
-      }
+      } */
 
       EventService.getPokemonNames(count, offset)
         .then((response) => {
