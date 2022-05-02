@@ -44,16 +44,19 @@
               <li>{{ pokemon.height }}</li>
               <li>{{ pokemon.weight }}</li>
               <li>
-                {{ pokemon.abilities[0].ability.name
-                }}<span v-if="pokemon.abilities[1]"
-                  >, {{ pokemon.abilities[1].ability.name }}</span
-                >
+                {{ pokemon.abilities[0].ability.name }}
+                <span v-if="pokemon.abilities[1]"
+                  >,
+                  {{ pokemon.abilities[1].ability.name }}
+                </span>
                 <span v-if="pokemon.abilities[2]"
-                  >, {{ pokemon.abilities[2].ability.name }}</span
-                >
+                  >,
+                  {{ pokemon.abilities[2].ability.name }}
+                </span>
                 <span v-if="pokemon.abilities[3]"
-                  >, {{ pokemon.abilities[3].ability.name }}</span
-                >
+                  >,
+                  {{ pokemon.abilities[3].ability.name }}
+                </span>
               </li>
             </ul>
           </div>
@@ -77,7 +80,7 @@ export default {
     pokemon: [],
     showModal: false,
     count: 151,
-    scrollLoad: 100,
+    scrollLoad: 150,
     search: '',
   }),
   methods: {
@@ -86,15 +89,18 @@ export default {
       this.pokemon = pokemon
     },
     getPokemonNames(count, offset) {
-      /*  if (this.pokemons.length >= 1126) {
+      if (this.pokemons.length >= 1126) {
         return
-      } */
+      }
+      if (this.pokemons.length === this.count && this.count === 151) {
+        count = count - 1
+      }
 
       EventService.getPokemonNames(count, offset)
         .then((response) => {
           const pokemons = response.data.results
 
-          async function processData() {
+          async function waitForPokeDetails() {
             const pokeDetails = []
 
             for (const data of pokemons) {
@@ -108,7 +114,7 @@ export default {
             return pokeDetails.sort((a, b) => a.id - b.id)
           }
 
-          return processData()
+          return waitForPokeDetails()
         })
         .then((data) => {
           this.pokemons.push(...data)
@@ -123,7 +129,7 @@ export default {
         let bottomOfWindow =
           document.documentElement.scrollTop + window.innerHeight ===
           document.documentElement.offsetHeight
-        if (bottomOfWindow) {
+        if (bottomOfWindow && !this.search) {
           this.getPokemonNames(this.scrollLoad, this.pokemons.length)
         }
       }
@@ -174,7 +180,7 @@ export default {
   height: 200px;
 }
 
-$primary: #000080;
+$primary: #800000;
 $dark: #000;
 
 .pokemonSearch {
