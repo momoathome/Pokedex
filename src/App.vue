@@ -13,13 +13,11 @@
         :pokemon="pokemon"
         @show-modal-data="showModalData(pokemon)"
       />
+
+      <Skeleton v-if="isCallingApi" v-for="index in scrollLoad" :key="index" />
     </div>
 
     <ButtonToTop />
-
-    <div v-if="isCallingApi" class="grid">
-      <Skeleton v-for="index in scrollLoad" :key="index" />
-    </div>
   </main>
 
   <Teleport to="body">
