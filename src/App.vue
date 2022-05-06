@@ -23,8 +23,14 @@
   <Teleport to="body">
     <modal :show="showModal" @close="showModal = false">
       <template #img>
-        <img :src="pokemon.sprites.front_default" class="detail-img" />
-        <img :src="pokemon.sprites.front_shiny" class="detail-img" />
+        <div>
+          <img :src="pokemon.sprites.front_default" class="detail-img" />
+          <p>Normal</p>
+        </div>
+        <div>
+          <img :src="pokemon.sprites.front_shiny" class="detail-img" />
+          <p>Shiny</p>
+        </div>
       </template>
       <template #body>
         <div class="poke-details">
@@ -33,6 +39,7 @@
               <li>Name</li>
               <li>No.</li>
               <li>Type's</li>
+              <li v-if="pokemon.is_legendary || pokemon.is_mythical">State</li>
               <li>Height</li>
               <li>Weight</li>
               <li>Abilities</li>
@@ -40,14 +47,26 @@
           </div>
           <div class="detail-values list-style-none">
             <ul>
-              <li>{{ pokemon.name }}</li>
+              <li>
+                {{ pokemon.name }}
+              </li>
               <li>{{ pokemon.id }}</li>
               <li>
-                {{ pokemon.types[0].type.name
-                }}<span v-if="pokemon.types[1]">/{{ pokemon.types[1].type.name }}</span>
+                <span class="poke-type" :class="pokemon.types[0].type.name">
+                  {{ pokemon.types[0].type.name }}
+                </span>
+                <span
+                  v-if="pokemon.types[1]"
+                  class="poke-type"
+                  :class="pokemon.types[1].type.name"
+                >
+                  {{ pokemon.types[1].type.name }}
+                </span>
               </li>
-              <li>{{ pokemon.height }}</li>
-              <li>{{ pokemon.weight }}</li>
+              <li v-if="pokemon.is_legendary">Legendary</li>
+              <li v-if="pokemon.is_mythical">Mythical</li>
+              <li class="to-lower-case">{{ pokemon.height / 10 }} m</li>
+              <li class="to-lower-case">{{ pokemon.weight / 10 }} kg</li>
               <li>
                 {{ pokemon.abilities[0].ability.name }}
                 <span v-if="pokemon.abilities[1]"
@@ -67,6 +86,34 @@
           </div>
         </div>
       </template>
+      <template #footer>
+        <div class="evolution-chain">
+          <div v-if="pokemon.evolution_base">
+            <img :src="pokemon.evolution_base.sprites.front_default" class="modal-img" />
+            <p>{{ pokemon.evolution_base.name }}</p>
+          </div>
+          <template v-if="pokemon.evolution_advanced">
+            <EvolutionArrow />
+          </template>
+          <div v-if="pokemon.evolution_advanced">
+            <img
+              :src="pokemon.evolution_advanced.sprites.front_default"
+              class="modal-img"
+            />
+            <p>{{ pokemon.evolution_advanced.name }}</p>
+          </div>
+          <template v-if="pokemon.evolution_expert">
+            <EvolutionArrow />
+          </template>
+          <div v-if="pokemon.evolution_expert">
+            <img
+              :src="pokemon.evolution_expert.sprites.front_default"
+              class="modal-img"
+            />
+            <p>{{ pokemon.evolution_expert.name }}</p>
+          </div>
+        </div>
+      </template>
     </modal>
   </Teleport>
 </template>
@@ -76,6 +123,7 @@ import EventService from './services/EventService'
 import Modal from './components/Modal.vue'
 import Skeleton from './components/Skeleton.vue'
 import ButtonToTop from './components/ButtonToTop.vue'
+import EvolutionArrow from './components/EvolutionArrow.vue'
 
 export default {
   components: {
@@ -83,6 +131,7 @@ export default {
     Modal,
     Skeleton,
     ButtonToTop,
+    EvolutionArrow,
   },
   data: () => ({
     pokemons: [],
@@ -95,8 +144,9 @@ export default {
   }),
   methods: {
     showModalData(pokemon) {
-      this.showModal = true
       this.pokemon = pokemon
+      this.showModal = true
+      console.log(this.pokemons)
     },
     getPokemonNames(count, offset) {
       if (this.pokemons.length >= 1126) {
@@ -134,7 +184,6 @@ export default {
         .then((data) => {
           this.pokemons.push(...data)
           this.isCallingApi = false
-          console.log(this.pokemons)
         })
         .catch((error) => {
           console.log(error)
@@ -198,6 +247,10 @@ export default {
   align-self: center;
   width: 200px;
   height: 200px;
+}
+
+.to-lower-case {
+  text-transform: lowercase;
 }
 
 .loading {
@@ -281,5 +334,73 @@ $dark: #000;
       }
     }
   }
+}
+
+.poke-type {
+  padding-inline: 0.5rem;
+  border: 1px solid black;
+  color: white;
+  font-size: 1rem;
+  text-shadow: 1px 1px 1px black, 1px -1px 1px black, -1px 1px 1px black,
+    -1px -1px 1px black;
+
+  &:first-of-type {
+    margin-right: 0.5rem;
+  }
+}
+
+.normal {
+  background-color: #a8a77a;
+}
+.fire {
+  background-color: #ee8130;
+}
+.water {
+  background-color: #6390f0;
+}
+.electric {
+  background-color: #f7d02c;
+}
+.grass {
+  background-color: #7ac74c;
+}
+.ice {
+  background-color: #96d9d6;
+}
+.fighting {
+  background-color: #c22e28;
+}
+.poison {
+  background-color: #a33ea1;
+}
+.ground {
+  background-color: #e2bf65;
+}
+.flying {
+  background-color: #a98ff3;
+}
+.psychic {
+  background-color: #f95587;
+}
+.bug {
+  background-color: #a6b91a;
+}
+.rock {
+  background-color: #b6a136;
+}
+.ghost {
+  background-color: #735797;
+}
+.dragon {
+  background-color: #6f35fc;
+}
+.dark {
+  background-color: #705746;
+}
+.steel {
+  background-color: #b7b7ce;
+}
+.fairy {
+  background-color: #d685ad;
 }
 </style>

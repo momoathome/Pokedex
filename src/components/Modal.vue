@@ -9,7 +9,13 @@
           </div>
 
           <div class="modal-body">
+            <h2>Details</h2>
             <slot name="body"></slot>
+          </div>
+
+          <div class="modal-footer">
+            <h2>Evolution</h2>
+            <slot name="footer"></slot>
           </div>
         </div>
       </div>
@@ -49,7 +55,7 @@ export default {
   max-width: 500px;
   margin: 0px auto;
   padding: 20px 30px;
-  background-color: #fff;
+  background-color: hsl(0, 0%, 85%);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.33);
   transition: all 0.3s ease;
 
@@ -69,17 +75,30 @@ export default {
   }
 }
 
+h2 {
+  margin-block: 0.5rem;
+  font-size: 27px;
+}
+p {
+  margin: 0;
+  text-align: center;
+}
 .modal-header {
   display: flex;
   justify-content: center;
   flex-wrap: wrap;
+  margin-bottom: 18px;
 }
 .detail-img {
   max-width: 200px;
   height: 200px;
 }
+.modal-img {
+  max-width: 125px;
+  height: 125px;
+}
 .modal-body {
-  margin-top: 20px;
+  margin-block: 20px;
   font-size: 18px;
   line-height: 24px;
 }
@@ -91,13 +110,26 @@ export default {
   grid-template-columns: 30% 70%;
   gap: 1rem;
 }
+.evolution-chain {
+  max-width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
 @media (max-width: 768px) {
   .detail-img {
-    max-width: 200px;
-    height: 150px;
+    max-width: 130px;
+    height: 130px;
+  }
+  .modal-img {
+    max-width: 110px;
+    height: 110px;
   }
   .poke-details {
     grid-template-columns: 40% 60%;
+  }
+  .evolution-chain {
+    flex-wrap: wrap;
   }
 }
 

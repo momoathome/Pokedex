@@ -14,6 +14,8 @@
 </template>
 
 <script>
+import EventService from '../services/EventService'
+
 export default {
   name: 'Pokemon',
   props: {
@@ -42,8 +44,64 @@ export default {
     },
   }),
   methods: {
-    showModal(pokemon) {
+    async showModal(pokemon) {
+      await this.setPokemonSpecies(pokemon.species.url)
+
       this.$emit('show-modal-data', pokemon)
+    },
+    getPokemonDetails(url) {
+      const result = EventService.getPokemonDetails(url).then((response) => response.data)
+      return result
+    },
+    getPokemonById(id) {
+      const result = EventService.getPokemonById(id).then((response) => response.data)
+      return result
+    },
+    async setPokemonSpecies(url) {
+      const species = await this.getPokemonDetails(url)
+
+      this.pokemon.is_legendary = species.is_legendary
+      this.pokemon.is_mythical = species.is_mythical
+
+      this.setEvolutionChain(species.evolution_chain.url)
+    },
+    async setEvolutionChain(url) {
+      const evolutionChain = await this.getPokemonDetails(url)
+      console.log(evolutionChain)
+
+      try {
+        const first = await this.getPokemonDetails(evolutionChain.chain.species.url)
+        const first_details = await this.getPokemonById(first.id)
+
+        this.pokemon.evolution_base = first_details
+        console.log(first)
+      } catch (error) {
+        this.pokemon.evolution_base = this.pokemon
+      }
+
+      try {
+        const second = await this.getPokemonDetails(
+          evolutionChain.chain.evolves_to[0].species.url
+        )
+        const second_details = await this.getPokemonById(second.id)
+
+        this.pokemon.evolution_advanced = second_details
+      } catch (error) {
+        this.pokemon.evolution_advanced = null
+      }
+
+      try {
+        const third = await this.getPokemonDetails(
+          evolutionChain.chain.evolves_to[0].evolves_to[0].species.url
+        )
+        const third_details = await this.getPokemonById(third.id)
+
+        this.pokemon.evolution_expert = third_details
+      } catch (error) {
+        this.pokemon.evolution_expert = null
+      }
+
+      console.log(this.pokemon)
     },
   },
   computed: {
@@ -82,63 +140,5 @@ export default {
     text-shadow: 1px 1px 1px black, 1px -1px 1px black, -1px 1px 1px black,
       -1px -1px 1px black;
   }
-}
-
-.clip {
-  clip-path: polygon(100% 0, 0% 100%, 100% 100%);
-}
-.normal {
-  background-color: #a8a77a;
-}
-.fire {
-  background-color: #ee8130;
-}
-.water {
-  background-color: #6390f0;
-}
-.electric {
-  background-color: #f7d02c;
-}
-.grass {
-  background-color: #7ac74c;
-}
-.ice {
-  background-color: #96d9d6;
-}
-.fighting {
-  background-color: #c22e28;
-}
-.poison {
-  background-color: #a33ea1;
-}
-.ground {
-  background-color: #e2bf65;
-}
-.flying {
-  background-color: #a98ff3;
-}
-.psychic {
-  background-color: #f95587;
-}
-.bug {
-  background-color: #a6b91a;
-}
-.rock {
-  background-color: #b6a136;
-}
-.ghost {
-  background-color: #735797;
-}
-.dragon {
-  background-color: #6f35fc;
-}
-.dark {
-  background-color: #705746;
-}
-.steel {
-  background-color: #b7b7ce;
-}
-.fairy {
-  background-color: #d685ad;
 }
 </style>

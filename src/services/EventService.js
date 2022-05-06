@@ -12,4 +12,10 @@ export default {
   getPokemonDetails(url) {
     return axios.get(`${url}`)
   },
+  getPokemonById(id) {
+    return apiClient.get(`pokemon/${id}`)
+  },
+  getPokemonByName(name) {
+    return apiClient.get(`pokemon/${name}`)
+  },
 }

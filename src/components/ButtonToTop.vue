@@ -29,10 +29,6 @@ export default {
   methods: {
     showButton() {
       document.addEventListener('scroll', () => {
-        console.log(
-          document.documentElement.scrollTop,
-          document.documentElement.scrollTop > this.showOnPx
-        )
         if (document.documentElement.scrollTop > this.showOnPx) {
           this.ishidden = true
         } else {
