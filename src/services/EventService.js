@@ -6,7 +6,7 @@ const apiClient = axios.create({
 })
 
 export default {
-  getPokemonNames(count, offset) {
+  getPokemonData(count, offset) {
     return apiClient.get(`/pokemon?offset=${offset}&limit=${count}`)
   },
   getPokemonDetails(url) {

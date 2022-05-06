@@ -15,10 +15,10 @@
       />
     </div>
 
-    <div v-if="isCallingApi" :class="{loading: pokemons != ''}">
-      <div class="grid">
-        <Skeleton v-for="index in scrollLoad" :key="index" />
-      </div>
+    <ButtonToTop />
+
+    <div v-if="isCallingApi" class="grid">
+      <Skeleton v-for="index in scrollLoad" :key="index" />
     </div>
   </main>
 
@@ -77,20 +77,22 @@ import Pokemon from './components/Pokemon.vue'
 import EventService from './services/EventService'
 import Modal from './components/Modal.vue'
 import Skeleton from './components/Skeleton.vue'
+import ButtonToTop from './components/ButtonToTop.vue'
 
 export default {
   components: {
     Pokemon,
     Modal,
     Skeleton,
+    ButtonToTop,
   },
   data: () => ({
     pokemons: [],
     pokemon: [],
     showModal: false,
     isCallingApi: true,
-    count: 151,
-    scrollLoad: 100,
+    count: 50,
+    scrollLoad: 25,
     search: '',
   }),
   methods: {
@@ -102,12 +104,16 @@ export default {
       if (this.pokemons.length >= 1126) {
         return
       }
+      // One time after first 151 Pokekom (generation 1) get 1 fewer to fill the line in the Grid
       if (this.pokemons.length === this.count && this.count === 151) {
         count = count - 1
       }
 
+      // show Skeleton loading animation during Api call
       this.isCallingApi = true
-      EventService.getPokemonNames(count, offset)
+
+      // get Pokemon Data
+      EventService.getPokemonData(count, offset)
         .then((response) => {
           const pokemons = response.data.results
 
@@ -139,8 +145,8 @@ export default {
     getNextPokemons() {
       window.onscroll = () => {
         let bottomOfWindow =
-          document.documentElement.scrollTop + window.innerHeight ===
-          document.documentElement.offsetHeight
+          document.documentElement.scrollTop >=
+          document.documentElement.offsetHeight - 2000
         if (bottomOfWindow && !this.search && !this.isCallingApi) {
           this.getPokemonNames(this.scrollLoad, this.pokemons.length)
         }
@@ -155,7 +161,7 @@ export default {
     },
   },
   beforeMount() {
-    this.getPokemonNames(this.count, this.offset)
+    this.getPokemonNames(this.count, 0)
   },
   mounted() {
     this.getNextPokemons()
@@ -187,6 +193,7 @@ export default {
   grid-template-columns: repeat(auto-fit, minmax(200px, 250px));
   gap: 4rem;
   justify-content: center;
+  margin-bottom: 4rem;
 }
 
 .img {
