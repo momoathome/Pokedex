@@ -5,6 +5,7 @@
       <span class="label">Search Pokemon ({{ pokemons.length }}) </span>
       <span class="focus-bg"></span>
     </label>
+
     <div class="grid">
       <Pokemon
         v-for="pokemon in filteredPokemon"
@@ -12,6 +13,12 @@
         :pokemon="pokemon"
         @show-modal-data="showModalData(pokemon)"
       />
+    </div>
+
+    <div v-if="isCallingApi" :class="{loading: pokemons != ''}">
+      <div class="grid">
+        <Skeleton v-for="index in scrollLoad" :key="index" />
+      </div>
     </div>
   </main>
 
@@ -69,18 +76,21 @@
 import Pokemon from './components/Pokemon.vue'
 import EventService from './services/EventService'
 import Modal from './components/Modal.vue'
+import Skeleton from './components/Skeleton.vue'
 
 export default {
   components: {
     Pokemon,
     Modal,
+    Skeleton,
   },
   data: () => ({
     pokemons: [],
     pokemon: [],
     showModal: false,
+    isCallingApi: true,
     count: 151,
-    scrollLoad: 150,
+    scrollLoad: 100,
     search: '',
   }),
   methods: {
@@ -96,6 +106,7 @@ export default {
         count = count - 1
       }
 
+      this.isCallingApi = true
       EventService.getPokemonNames(count, offset)
         .then((response) => {
           const pokemons = response.data.results
@@ -118,6 +129,7 @@ export default {
         })
         .then((data) => {
           this.pokemons.push(...data)
+          this.isCallingApi = false
           console.log(this.pokemons)
         })
         .catch((error) => {
@@ -129,7 +141,7 @@ export default {
         let bottomOfWindow =
           document.documentElement.scrollTop + window.innerHeight ===
           document.documentElement.offsetHeight
-        if (bottomOfWindow && !this.search) {
+        if (bottomOfWindow && !this.search && !this.isCallingApi) {
           this.getPokemonNames(this.scrollLoad, this.pokemons.length)
         }
       }
@@ -167,6 +179,9 @@ export default {
   margin: auto;
   padding-top: 4rem;
 }
+.content {
+  margin-bottom: 4rem;
+}
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 250px));
@@ -178,6 +193,10 @@ export default {
   align-self: center;
   width: 200px;
   height: 200px;
+}
+
+.loading {
+  margin-top: 4rem;
 }
 
 $primary: #800000;
