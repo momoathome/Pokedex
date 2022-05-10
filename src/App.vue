@@ -341,6 +341,7 @@ $dark: #000;
   border: 1px solid black;
   color: white;
   font-size: 1rem;
+  text-transform: lowercase;
   text-shadow: 1px 1px 1px black, 1px -1px 1px black, -1px 1px 1px black,
     -1px -1px 1px black;
 

@@ -47,22 +47,27 @@ export default {
 .modal-wrapper {
   display: table-cell;
   vertical-align: middle;
+  -webkit-font-smoothing: antialiased;
 }
 
 .modal-container {
+  position: relative;
   display: flex;
   flex-direction: column;
   max-width: 500px;
   margin: 0px auto;
   padding: 20px 30px;
-  background-color: hsl(0, 0%, 85%);
+  background-color: hsl(0, 0%, 100%);
+  border: 4px solid black;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.33);
   transition: all 0.3s ease;
 
   .btn-close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
     background: none;
     border: none;
-    align-self: end;
     font-weight: 700;
     font-size: 1.25rem;
     cursor: pointer;
