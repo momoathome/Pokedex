@@ -58,7 +58,8 @@ export default {
   margin: 0px auto;
   padding: 20px 30px;
   background-color: hsl(0, 0%, 100%);
-  border: 4px solid black;
+  border: 16px solid #ccc;
+  border-radius: 20px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.33);
   transition: all 0.3s ease;
 
@@ -88,17 +89,56 @@ p {
   margin: 0;
   text-align: center;
 }
+
+.modal-img {
+  position: relative;
+  background-color: transparent;
+  width: 200px;
+  height: 200px;
+  perspective: 1000px;
+
+  &:hover .modal-img-inner {
+    transform: rotateY(180deg);
+  }
+
+  .modal-img-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    text-align: center;
+    transition: transform 0.8s;
+    transform-style: preserve-3d;
+    box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+  }
+
+  .poke-front,
+  .poke-back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    -webkit-backface-visibility: hidden; /* Safari */
+    backface-visibility: hidden;
+  }
+
+  .poke-front {
+    background-color: #fff;
+  }
+  .poke-back {
+    background-color: #fff;
+    transform: rotateY(180deg);
+  }
+}
+
 .modal-header {
   display: flex;
   justify-content: center;
   flex-wrap: wrap;
-  margin-bottom: 18px;
 }
 .detail-img {
   max-width: 200px;
   height: 200px;
 }
-.modal-img {
+.evolution-img {
   max-width: 125px;
   height: 125px;
 }
@@ -107,7 +147,7 @@ p {
   font-size: 18px;
   line-height: 24px;
 }
-.poke-details {
+.modal-details {
   max-width: 100%;
   padding: 0;
   margin: 0;
@@ -122,13 +162,32 @@ p {
 }
 
 @media (max-width: 768px) {
+  .modal-container {
+    border: none;
+    padding: 20px 0;
+    border-radius: 0;
+  }
+  .poke-img {
+    width: 150px;
+    height: 150px;
+  }
   .detail-img {
-    max-width: 130px;
-    height: 130px;
+    max-width: 150px;
+    height: 150px;
   }
   .modal-img {
-    max-width: 110px;
-    height: 110px;
+    max-width: 100px;
+    height: 100px;
+  }
+  .modal-body {
+    margin-block: 0;
+    margin-top: 20px;
+    padding-inline: 20px;
+  }
+  .modal-footer {
+    h2 {
+      padding-left: 20px;
+    }
   }
   .poke-details {
     grid-template-columns: 40% 60%;

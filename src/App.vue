@@ -23,17 +23,19 @@
   <Teleport to="body">
     <modal :show="showModal" @close="showModal = false">
       <template #img>
-        <div>
-          <img :src="pokemon.sprites.front_default" class="detail-img" />
-          <p>Normal</p>
-        </div>
-        <div>
-          <img :src="pokemon.sprites.front_shiny" class="detail-img" />
-          <p>Shiny</p>
+        <div class="modal-img">
+          <div class="modal-img-inner">
+            <div class="poke-front">
+              <img :src="pokemon.sprites.front_default" class="detail-img" />
+            </div>
+            <div class="poke-back">
+              <img :src="pokemon.sprites.front_shiny" class="detail-img" />
+            </div>
+          </div>
         </div>
       </template>
       <template #body>
-        <div class="poke-details">
+        <div class="modal-details">
           <div class="detail-keys list-style-none">
             <ul>
               <li>Name</li>
@@ -68,8 +70,8 @@
               <li class="to-lower-case">{{ pokemon.height / 10 }} m</li>
               <li class="to-lower-case">{{ pokemon.weight / 10 }} kg</li>
               <li>
-                {{ pokemon.abilities[0].ability.name }}
-                <span v-if="pokemon.abilities[1]"
+                {{ pokemon.abilities[0].ability.name
+                }}<span v-if="pokemon.abilities[1]"
                   >,
                   {{ pokemon.abilities[1].ability.name }}
                 </span>
@@ -77,6 +79,7 @@
                   >,
                   {{ pokemon.abilities[2].ability.name }}
                 </span>
+                <br />
                 <span v-if="pokemon.abilities[3]"
                   >,
                   {{ pokemon.abilities[3].ability.name }}
@@ -89,7 +92,10 @@
       <template #footer>
         <div class="evolution-chain">
           <div v-if="pokemon.evolution_base">
-            <img :src="pokemon.evolution_base.sprites.front_default" class="modal-img" />
+            <img
+              :src="pokemon.evolution_base.sprites.front_default"
+              class="evolution-img"
+            />
             <p>{{ pokemon.evolution_base.name }}</p>
           </div>
           <template v-if="pokemon.evolution_advanced">
@@ -98,7 +104,7 @@
           <div v-if="pokemon.evolution_advanced">
             <img
               :src="pokemon.evolution_advanced.sprites.front_default"
-              class="modal-img"
+              class="evolution-img"
             />
             <p>{{ pokemon.evolution_advanced.name }}</p>
           </div>
@@ -108,7 +114,7 @@
           <div v-if="pokemon.evolution_expert">
             <img
               :src="pokemon.evolution_expert.sprites.front_default"
-              class="modal-img"
+              class="evolution-img"
             />
             <p>{{ pokemon.evolution_expert.name }}</p>
           </div>
@@ -136,6 +142,7 @@ export default {
   data: () => ({
     pokemons: [],
     pokemon: [],
+    pokeAbilitys: [],
     showModal: false,
     isCallingApi: true,
     count: 50,
@@ -146,7 +153,7 @@ export default {
     showModalData(pokemon) {
       this.pokemon = pokemon
       this.showModal = true
-      console.log(this.pokemons)
+      //console.log(this.pokemons)
     },
     getPokemonNames(count, offset) {
       if (this.pokemons.length >= 1126) {
@@ -159,6 +166,8 @@ export default {
 
       // show Skeleton loading animation during Api call
       this.isCallingApi = true
+      const pokeDetails = []
+      const abilitys = this.pokeAbilitys
 
       // get Pokemon Data
       EventService.getPokemonData(count, offset)
@@ -166,16 +175,57 @@ export default {
           const pokemons = response.data.results
 
           async function waitForPokeDetails() {
-            const pokeDetails = []
-
             for (const data of pokemons) {
-              await EventService.getPokemonDetails(data.url).then((response) => {
-                const details = response.data
+              await EventService.getPokemonDetails(data.url)
+                .then((response) => {
+                  const details = response.data
+                  pokeDetails.push(details)
+                  return details
+                })
+                .then((data) => {
+                  for (const index in data.abilities) {
+                    const name = data.abilities[index].ability.name
 
-                pokeDetails.push(details)
-              })
+                    const found = abilitys.find((element) => element.name == name)
+
+                    if (!found) {
+                      async function pokeAbilitys() {
+                        await EventService.getPokemonDetails(
+                          data.abilities[index].ability.url
+                        ).then((response) => {
+                          let abilityDesc
+                          //console.log(response.data)
+
+                          let entry = response.data.effect_entries
+                          if (entry[1].language.name == 'en') {
+                            entry = entry[1]
+                          } else {
+                            entry = entry[0]
+                          }
+
+                          if (entry) {
+                            abilityDesc = entry.short_effect
+                          }
+                          if (!entry) {
+                            abilityDesc = response.data.flavor_text_entries[7].flavor_text
+                          } else {
+                            abilityDesc = entry.effect
+                          }
+
+                          data.abilities[index].desc = abilityDesc
+                          abilitys.push({name: name, desc: abilityDesc})
+                        })
+                      }
+
+                      pokeAbilitys()
+                    } else {
+                      const description = abilitys.find((element) => element.name == name)
+                      //console.log(description)
+                      data.abilities[index].desc = description.desc
+                    }
+                  }
+                })
             }
-
             return pokeDetails.sort((a, b) => a.id - b.id)
           }
 
@@ -185,8 +235,9 @@ export default {
           this.pokemons.push(...data)
           this.isCallingApi = false
         })
+
         .catch((error) => {
-          console.log(error)
+          //console.log(error)
         })
     },
     getNextPokemons() {
@@ -237,7 +288,7 @@ export default {
 }
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 250px));
+  grid-template-columns: repeat(auto-fit, 300px);
   gap: 4rem;
   justify-content: center;
   margin-bottom: 4rem;
