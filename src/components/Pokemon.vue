@@ -2,13 +2,14 @@
   <div class="poke-card" @click="showModal(pokemon)" :style="createMainBackground">
     <div class="poke-head">
       <div class="poke-name">
-        <h3>{{ pokemon.name }}</h3>
+        <h3 v-if="pokemon.id < 10000">{{ pokemon.name }}</h3>
+        <h3 v-else class="pokemon-name-small">{{ pokemon.name }}</h3>
         <span class="poke-id">No.{{ pokemon.id }}</span>
       </div>
       <div class="poke-head-info">
-        <div class="poke-kp">90 <span>KP</span></div>
+        <div class="poke-kp">{{ pokemon.stats[0].base_stat }} <span>KP</span></div>
         <div class="poke-element-icon">
-          <img :src="'src/assets/' + setElementIcon" alt="" />
+          <img :src="'assets/' + setElementIcon" alt="" />
         </div>
       </div>
     </div>
@@ -19,7 +20,11 @@
       </div>
     </div>
     <div class="poke-footer">
-      <div class="poke-details"><span>Height: 1.5m</span>,<span>Weight: 60kg</span></div>
+      <div class="poke-details">
+        <span>Height: {{ pokemon.height / 10 }}m </span>,<span
+          >Weight: {{ pokemon.weight / 10 }}kg
+        </span>
+      </div>
       <div class="poke-abilities">
         <div class="poke-ability">
           {{ pokemon.abilities[0].ability.name }}
@@ -228,8 +233,23 @@ export default {
     text-shadow: 1px 1px 1px black, 1px -1px 1px black, -1px 1px 1px black,
       -1px -1px 1px black;
   }
+
+  .pokemon-name-small {
+    max-width: 100px;
+    margin: 0;
+    font-size: 0.9rem;
+    color: #fff;
+    text-shadow: 1px 1px 1px black, 1px -1px 1px black, -1px 1px 1px black,
+      -1px -1px 1px black;
+  }
   .poke-id {
-    font-size: 0.75rem;
+    font-size: 0.6rem;
+    font-weight: bold;
+    align-self: flex-end;
+    margin-left: 0.25rem;
+  }
+  .poke-id-small {
+    font-size: 0.5rem;
     font-weight: bold;
     align-self: flex-end;
     margin-left: 0.25rem;
@@ -249,8 +269,8 @@ export default {
   }
 }
 .poke-element-icon {
-  height: 24px;
-  width: 24px;
+  height: 22px;
+  width: 22px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -261,8 +281,8 @@ export default {
   &::before {
     content: '';
     position: absolute;
-    height: 24px;
-    width: 24px;
+    height: 22px;
+    width: 22px;
     background: linear-gradient(#ffffff 0%, #ffffff 60%, #ffffff 100%);
     border-radius: 50%;
     filter: blur(18px);
@@ -270,8 +290,8 @@ export default {
   }
 
   img {
-    height: 24px;
-    width: 24px;
+    height: 22px;
+    width: 22px;
     perspective: 1200px;
     perspective-origin: 50% 50%;
   }

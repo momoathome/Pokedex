@@ -194,22 +194,32 @@ export default {
                           data.abilities[index].ability.url
                         ).then((response) => {
                           let abilityDesc
+                          let entry
+
                           //console.log(response.data)
 
-                          let entry = response.data.effect_entries
-                          if (entry[1].language.name == 'en') {
-                            entry = entry[1]
-                          } else {
-                            entry = entry[0]
-                          }
+                          if (response.data.effect_entries.length > 0) {
+                            entry = response.data.effect_entries
+                            //console.log(entry)
 
-                          if (entry) {
-                            abilityDesc = entry.short_effect
-                          }
-                          if (!entry) {
-                            abilityDesc = response.data.flavor_text_entries[7].flavor_text
+                            if (entry[0] && entry[0].language.name == 'en') {
+                              entry = entry[0]
+                            } else if (entry[1] && entry[1].language.name == 'en') {
+                              entry = entry[1]
+                            } else {
+                              entry = entry[0]
+                            }
+
+                            if (entry && entry.short_effect) {
+                              abilityDesc = entry.short_effect
+                            } else {
+                              abilityDesc = entry.effect
+                            }
                           } else {
-                            abilityDesc = entry.effect
+                            abilityDesc = response.data.flavor_text_entries[7].flavor_text
+                          }
+                          if (abilityDesc == '') {
+                            return console.log(response.data)
                           }
 
                           data.abilities[index].desc = abilityDesc
