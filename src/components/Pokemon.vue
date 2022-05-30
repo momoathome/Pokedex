@@ -19,6 +19,7 @@
         <img :src="pokemon.sprites.front_default" class="img" />
       </div>
     </div>
+
     <div class="poke-footer">
       <div class="poke-details">
         <span>Height: {{ pokemon.height / 10 }}m </span>,<span
@@ -152,52 +153,20 @@ export default {
     },
   },
   computed: {
-    // :style="pokemon.types[1] ? createBackgroundString : createMainBackground"
-
-    /* createBackgroundString() {
-      const type1 = this.types[this.pokemon.types[0].type.name]
-      const type2 = this.types[this.pokemon.types[1].type.name]
-      return `background: linear-gradient(135deg, ${type1} 50%, ${type2} 50%)`
-    }, */
-    /*   createMainBackground() {
-      const type = this.types[this.pokemon.types[0].type.name]
-      return `background-color: ${type} `
-    }, */
     createMainBackground() {
       const type = this.types[this.pokemon.types[0].type.name]
+      this.pokemon.types[0].type.hex = type
       return `background: linear-gradient(315deg, ${type[0]} 0%, ${type[1]} 74%)`
     },
     setElementIcon() {
       const type = this.pokemon.types[0].type.name
       return `Pokemon_${type}_Type_Icon.svg`
     },
-
-    /* createMultiColorBorder() {
-      const type1 = this.types[this.pokemon.types[0].type.name]
-      const type2 = this.types[this.pokemon.types[1].type.name]
-      return `border-image: linear-gradient(135deg, ${type1} 50%, ${type2} 50%) 1 stretch repeat;`
-    },
-    createMainBorder() {
-      const type = this.types[this.pokemon.types[0].type.name]
-      return `border-color: ${type} `
-    }, */
   },
 }
 </script>
 
-<style lang="scss" scoped>
-@keyframes shine {
-  0% {
-    transform: translateX(-100%) translateY(-100%) rotate(30deg);
-  }
-  80% {
-    transform: translateX(-100%) translateY(-100%) rotate(30deg);
-  }
-  100% {
-    transform: translateX(100%) translateY(100%) rotate(30deg);
-  }
-}
-
+<style lang="scss">
 .poke-card {
   cursor: pointer;
   position: relative;
@@ -206,7 +175,6 @@ export default {
   flex-direction: column;
   height: 475px;
   width: 300px;
-  border-radius: 20px;
   border: 12px solid;
   border-image-source: linear-gradient(245deg, #bcc6cc, #eee, #bcc6cc);
   border-image-slice: 80 20;
@@ -302,6 +270,8 @@ export default {
   justify-content: center;
 }
 .poke-img {
+  display: flex;
+  justify-content: center;
   border: 6px solid;
   border-image-source: linear-gradient(
     255deg,
@@ -318,7 +288,8 @@ export default {
   box-shadow: rgba(0, 0, 0, 0.24) 6px 6px 6px;
 }
 .img {
-  width: 100%;
+  width: 200px;
+  height: 200px;
 }
 .poke-footer {
   display: flex;

@@ -20,76 +20,63 @@
     <ButtonToTop />
   </main>
 
-  <Teleport to="body">
-    <modal :show="showModal" @close="showModal = false">
-      <template #img>
-        <div class="modal-img">
-          <div class="modal-img-inner">
-            <div class="poke-front">
-              <img :src="pokemon.sprites.front_default" class="detail-img" />
-            </div>
-            <div class="poke-back">
-              <img :src="pokemon.sprites.front_shiny" class="detail-img" />
+  <Teleport to="#modal">
+    <modal :show="showModal" @close="showModal = false" :types="hexTypes">
+      <template #poke-head>
+        <div class="poke-head">
+          <div class="poke-name">
+            <h3 class="pokemon-name-large">{{ pokemon.name }}</h3>
+            <span class="poke-id-large">No.{{ pokemon.id }}</span>
+          </div>
+          <div class="poke-head-info">
+            <div class="poke-kp">{{ pokemon.stats[0].base_stat }} <span>KP</span></div>
+            <div class="poke-element-icon">
+              <img :src="'assets/' + setElementIcon" alt="" />
             </div>
           </div>
         </div>
       </template>
-      <template #body>
-        <div class="modal-details">
-          <div class="detail-keys list-style-none">
-            <ul>
-              <li>Name</li>
-              <li>No.</li>
-              <li>Type's</li>
-              <li v-if="pokemon.is_legendary || pokemon.is_mythical">State</li>
-              <li>Height</li>
-              <li>Weight</li>
-              <li>Abilities</li>
-            </ul>
-          </div>
-          <div class="detail-values list-style-none">
-            <ul>
-              <li>
-                {{ pokemon.name }}
-              </li>
-              <li>{{ pokemon.id }}</li>
-              <li>
-                <span class="poke-type" :class="pokemon.types[0].type.name">
-                  {{ pokemon.types[0].type.name }}
-                </span>
-                <span
-                  v-if="pokemon.types[1]"
-                  class="poke-type"
-                  :class="pokemon.types[1].type.name"
-                >
-                  {{ pokemon.types[1].type.name }}
-                </span>
-              </li>
-              <li v-if="pokemon.is_legendary">Legendary</li>
-              <li v-if="pokemon.is_mythical">Mythical</li>
-              <li class="to-lower-case">{{ pokemon.height / 10 }} m</li>
-              <li class="to-lower-case">{{ pokemon.weight / 10 }} kg</li>
-              <li>
-                {{ pokemon.abilities[0].ability.name
-                }}<span v-if="pokemon.abilities[1]"
-                  >,
-                  {{ pokemon.abilities[1].ability.name }}
-                </span>
-                <span v-if="pokemon.abilities[2]"
-                  >,
-                  {{ pokemon.abilities[2].ability.name }}
-                </span>
-                <br />
-                <span v-if="pokemon.abilities[3]"
-                  >,
-                  {{ pokemon.abilities[3].ability.name }}
-                </span>
-              </li>
-            </ul>
+
+      <template #poke-body>
+        <div class="poke-body">
+          <div class="modal-img">
+            <div class="poke-img-container">
+              <div class="poke-img poke-front">
+                <img :src="pokemon.sprites.front_default" class="img-large" />
+              </div>
+              <div class="poke-img poke-back">
+                <img :src="pokemon.sprites.front_shiny" class="img-large" />
+              </div>
+            </div>
           </div>
         </div>
       </template>
-      <template #footer>
+
+      <template #poke-footer>
+        <div class="poke-footer">
+          <div class="poke-details modal-details">
+            <span>Height: {{ pokemon.height / 10 }}m </span>,<span
+              >Weight: {{ pokemon.weight / 10 }}kg
+            </span>
+          </div>
+          <div class="poke-abilities modal-abilities">
+            <div class="poke-ability">
+              {{ pokemon.abilities[0].ability.name }}
+              <span v-if="pokemon.abilities[0].desc" class="poke-ability-desc"
+                >{{ pokemon.abilities[0].desc }}
+              </span>
+            </div>
+            <div class="poke-ability" v-if="pokemon.abilities[1]">
+              {{ pokemon.abilities[1].ability.name }}
+              <span v-if="pokemon.abilities[1].desc" class="poke-ability-desc"
+                >{{ pokemon.abilities[1].desc }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </template>
+
+      <template #poke-evolution>
         <div class="evolution-chain">
           <div v-if="pokemon.evolution_base">
             <img
@@ -143,6 +130,7 @@ export default {
     pokemons: [],
     pokemon: [],
     pokeAbilitys: [],
+    hexTypes: [],
     showModal: false,
     isCallingApi: true,
     count: 50,
@@ -152,6 +140,7 @@ export default {
   methods: {
     showModalData(pokemon) {
       this.pokemon = pokemon
+      this.hexTypes = this.pokemon.types[0].type.hex
       this.showModal = true
       //console.log(this.pokemons)
     },
@@ -267,6 +256,10 @@ export default {
         return poke.name.toLowerCase().indexOf(this.search.toLowerCase()) != -1
       })
     },
+    setElementIcon() {
+      const type = this.pokemon.types[0].type.name
+      return `Pokemon_${type}_Type_Icon.svg`
+    },
   },
   beforeMount() {
     this.getPokemonNames(this.count, 0)
@@ -302,12 +295,6 @@ export default {
   gap: 4rem;
   justify-content: center;
   margin-bottom: 4rem;
-}
-
-.img {
-  align-self: center;
-  width: 200px;
-  height: 200px;
 }
 
 .to-lower-case {

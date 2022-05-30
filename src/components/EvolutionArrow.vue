@@ -32,8 +32,8 @@ export default {
   align-items: center;
 }
 .evolution-arrow {
-  height: 35px;
-  width: 35px;
+  height: 30px;
+  width: 30px;
 }
 
 @media (max-width: 768px) {

@@ -2,21 +2,18 @@
   <Transition name="modal">
     <div v-if="show" class="modal-mask">
       <div class="modal-wrapper">
-        <div class="modal-container">
+        <div class="modal-container" :style="createMainBackground">
           <button class="btn-close" @click="$emit('close')">X</button>
-          <div class="modal-header">
-            <slot name="img"></slot>
+
+          <div class="poke-modal-header">
+            <slot name="poke-head"></slot>
           </div>
 
-          <div class="modal-body">
-            <h2>Details</h2>
-            <slot name="body"></slot>
-          </div>
+          <slot name="poke-body"></slot>
 
-          <div class="modal-footer">
-            <h2>Evolution</h2>
-            <slot name="footer"></slot>
-          </div>
+          <slot name="poke-footer"></slot>
+
+          <slot name="poke-evolution"></slot>
         </div>
       </div>
     </div>
@@ -27,6 +24,13 @@
 export default {
   props: {
     show: Boolean,
+    types: Array,
+  },
+  computed: {
+    createMainBackground() {
+      const type = this.types
+      return `background: linear-gradient(315deg, ${type[0]} 0%, ${type[1]} 74%)`
+    },
   },
 }
 </script>
@@ -54,13 +58,13 @@ export default {
   position: relative;
   display: flex;
   flex-direction: column;
-  max-width: 500px;
+  max-width: 450px;
   margin: 0px auto;
   padding: 20px 30px;
   background-color: hsl(0, 0%, 100%);
-  border: 16px solid #ccc;
-  border-radius: 20px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.33);
+  border: 16px solid;
+  border-image-source: linear-gradient(245deg, #bcc6cc, #eee, #bcc6cc);
+  border-image-slice: 80 20;
   transition: all 0.3s ease;
 
   .btn-close {
@@ -72,6 +76,7 @@ export default {
     font-weight: 700;
     font-size: 1.25rem;
     cursor: pointer;
+    transition: all 0.3s;
   }
 }
 .list-style-none {
@@ -92,16 +97,16 @@ p {
 
 .modal-img {
   position: relative;
+  width: 262px;
+  height: 262px;
   background-color: transparent;
-  width: 200px;
-  height: 200px;
   perspective: 1000px;
 
-  &:hover .modal-img-inner {
+  &:hover .poke-img-container {
     transform: rotateY(180deg);
   }
 
-  .modal-img-inner {
+  .poke-img-container {
     position: relative;
     width: 100%;
     height: 100%;
@@ -120,40 +125,47 @@ p {
     backface-visibility: hidden;
   }
 
-  .poke-front {
-    background-color: #fff;
-  }
   .poke-back {
-    background-color: #fff;
     transform: rotateY(180deg);
+  }
+
+  .img-large {
+    width: 250px;
+    height: 250px;
   }
 }
 
-.modal-header {
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
+.modal-details {
+  width: 240px;
 }
-.detail-img {
-  max-width: 200px;
-  height: 200px;
+
+.poke-id-large {
+  font-size: 0.9rem;
+  font-weight: bold;
+  align-self: flex-end;
+  margin-left: 0.25rem;
+}
+.poke-modal-header {
+  margin-inline: 13.5%;
+
+  .poke-name {
+    margin: 0;
+    .pokemon-name-large {
+      margin: 0;
+      font-size: 1.1rem;
+      color: #fff;
+      text-shadow: 1px 1px 1px black, 1px -1px 1px black, -1px 1px 1px black,
+        -1px -1px 1px black;
+    }
+  }
+}
+
+.modal-abilities {
+  margin-top: 1.5rem;
 }
 .evolution-img {
   max-width: 125px;
   height: 125px;
-}
-.modal-body {
-  margin-block: 20px;
-  font-size: 18px;
-  line-height: 24px;
-}
-.modal-details {
-  max-width: 100%;
-  padding: 0;
-  margin: 0;
-  display: grid;
-  grid-template-columns: 30% 70%;
-  gap: 1rem;
 }
 .evolution-chain {
   max-width: 100%;
@@ -208,7 +220,7 @@ p {
 
 .modal-enter-from .modal-container,
 .modal-leave-to .modal-container {
-  -webkit-transform: scale(1.1);
-  transform: scale(1.1);
+  -webkit-transform: scale(0.9);
+  transform: scale(0.9);
 }
 </style>
