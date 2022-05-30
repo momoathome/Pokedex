@@ -5,13 +5,15 @@
         <div class="modal-container" :style="createMainBackground">
           <button class="btn-close" @click="$emit('close')">X</button>
 
-          <div class="poke-modal-header">
-            <slot name="poke-head"></slot>
+          <div class="modal-content">
+            <div class="poke-modal-header">
+              <slot name="poke-head"></slot>
+            </div>
+
+            <slot name="poke-body"></slot>
+
+            <slot name="poke-footer"></slot>
           </div>
-
-          <slot name="poke-body"></slot>
-
-          <slot name="poke-footer"></slot>
 
           <slot name="poke-evolution"></slot>
         </div>
@@ -60,7 +62,7 @@ export default {
   flex-direction: column;
   max-width: 450px;
   margin: 0px auto;
-  padding: 20px 30px;
+  padding-bottom: 20px;
   background-color: hsl(0, 0%, 100%);
   border: 16px solid;
   border-image-source: linear-gradient(245deg, #bcc6cc, #eee, #bcc6cc);
@@ -78,6 +80,9 @@ export default {
     cursor: pointer;
     transition: all 0.3s;
   }
+}
+.modal-content {
+  padding: 20px 30px;
 }
 .list-style-none {
   ul {
@@ -176,36 +181,32 @@ p {
 @media (max-width: 768px) {
   .modal-container {
     border: none;
-    padding: 20px 0;
     border-radius: 0;
+    max-width: 100%;
+    height: 100%;
   }
-  .poke-img {
-    width: 150px;
-    height: 150px;
-  }
-  .detail-img {
-    max-width: 150px;
-    height: 150px;
-  }
+
   .modal-img {
-    max-width: 100px;
-    height: 100px;
-  }
-  .modal-body {
-    margin-block: 0;
-    margin-top: 20px;
-    padding-inline: 20px;
-  }
-  .modal-footer {
-    h2 {
-      padding-left: 20px;
+    width: 232px;
+    height: 232px;
+
+    .img-large {
+      width: 220px;
+      height: 220px;
     }
   }
-  .poke-details {
-    grid-template-columns: 40% 60%;
+
+  .modal-details {
+    width: 210px;
   }
+
   .evolution-chain {
     flex-wrap: wrap;
+  }
+
+  .evolution-img {
+    max-width: 100px;
+    height: 100px;
   }
 }
 
