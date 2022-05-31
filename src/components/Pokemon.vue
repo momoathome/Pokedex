@@ -296,13 +296,13 @@ export default {
   flex-direction: column;
 }
 .poke-details {
-  width: 90%;
+  width: 93%;
   display: flex;
   justify-content: center;
   align-self: center;
   font-size: 11.5px;
   font-weight: bold;
-  padding: 4px;
+  padding-block: 4px;
   background: linear-gradient(135deg, #bf953f, #fcf6ba, #aa771c);
   margin-top: 2px;
   clip-path: polygon(0 0, 100% 0, 95% 100%, 5% 100%);
