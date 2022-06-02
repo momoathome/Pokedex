@@ -144,108 +144,120 @@ export default {
       this.showModal = true
       //console.log(this.pokemons)
     },
-    getPokemonNames(count, offset) {
+    getPokemons(count, offset) {
+      // No new API calls after "max Pokemon count" in API Data
       if (this.pokemons.length >= 1126) {
         return
       }
-      // One time after first 151 Pokekom (generation 1) get 1 fewer to fill the line in the Grid
+      /*  // One time after first 151 Pokekom (generation 1) get 1 fewer to fill the line in the Grid
       if (this.pokemons.length === this.count && this.count === 151) {
         count = count - 1
-      }
+      } */
 
       // show Skeleton loading animation during Api call
       this.isCallingApi = true
-      const pokeDetails = []
-      const abilitys = this.pokeAbilitys
 
       // get Pokemon Data
       EventService.getPokemonData(count, offset)
         .then((response) => {
           const pokemons = response.data.results
-
-          async function waitForPokeDetails() {
-            for (const data of pokemons) {
-              await EventService.getPokemonDetails(data.url)
-                .then((response) => {
-                  const details = response.data
-                  pokeDetails.push(details)
-                  return details
-                })
-                .then((data) => {
-                  for (const index in data.abilities) {
-                    const name = data.abilities[index].ability.name
-
-                    const found = abilitys.find((element) => element.name == name)
-
-                    if (!found) {
-                      async function pokeAbilitys() {
-                        await EventService.getPokemonDetails(
-                          data.abilities[index].ability.url
-                        ).then((response) => {
-                          let abilityDesc
-                          let entry
-
-                          //console.log(response.data)
-
-                          if (response.data.effect_entries.length > 0) {
-                            entry = response.data.effect_entries
-                            //console.log(entry)
-
-                            if (entry[0] && entry[0].language.name == 'en') {
-                              entry = entry[0]
-                            } else if (entry[1] && entry[1].language.name == 'en') {
-                              entry = entry[1]
-                            } else {
-                              entry = entry[0]
-                            }
-
-                            if (entry && entry.short_effect) {
-                              abilityDesc = entry.short_effect
-                            } else {
-                              abilityDesc = entry.effect
-                            }
-                          } else {
-                            abilityDesc = response.data.flavor_text_entries[7].flavor_text
-                          }
-                          if (abilityDesc == '') {
-                            return console.log(response.data)
-                          }
-
-                          data.abilities[index].desc = abilityDesc
-                          abilitys.push({name: name, desc: abilityDesc})
-                        })
-                      }
-
-                      pokeAbilitys()
-                    } else {
-                      const description = abilitys.find((element) => element.name == name)
-                      //console.log(description)
-                      data.abilities[index].desc = description.desc
-                    }
-                  }
-                })
-            }
-            return pokeDetails.sort((a, b) => a.id - b.id)
-          }
-
-          return waitForPokeDetails()
+          const pokeDetails = this.getPokeDetails(pokemons)
+          return pokeDetails
         })
         .then((data) => {
+          // End result - by ID sorted Pokemon array with Details, and ability Names + Description
           this.pokemons.push(...data)
           this.isCallingApi = false
+          //console.log(data)
         })
-
         .catch((error) => {
-          //console.log(error)
+          console.log(error)
         })
+    },
+    getPokeDetails(pokemons) {
+      const pokeDetails = []
+
+      const waitForPokeDetails = async () => {
+        for (const data of pokemons) {
+          await EventService.getPokemonDetails(data.url)
+            .then((response) => {
+              pokeDetails.push(response.data)
+              return response.data
+            })
+            .then((data) => {
+              //console.log(data)
+              this.getPokemonAbilityDescription(data)
+            })
+        }
+        //console.log(pokeDetails)
+
+        // sort pokemons with added details - according to pokemon ID
+        return pokeDetails.sort((a, b) => a.id - b.id)
+      }
+
+      return waitForPokeDetails()
+    },
+    getPokemonAbilityDescription(data) {
+      //console.log(data)
+      const abilitys = this.pokeAbilitys
+
+      for (const index in data.abilities) {
+        const abilityName = data.abilities[index].ability.name
+
+        // checks if the ability from the pokemon was already fetcht
+        const found = abilitys.find((element) => element.name == abilityName)
+
+        // if ability was not already fetcht, fetches the ability Name and Description - New API call
+        if (!found) {
+          async function pokeAbilitys() {
+            await EventService.getPokemonDetails(data.abilities[index].ability.url).then(
+              (response) => {
+                let abilityDesc
+                let entry
+                //console.log(response.data)
+
+                // finds the englisch Ablity Description
+                // if existing - uses the short Description
+                if (response.data.effect_entries.length > 0) {
+                  entry = response.data.effect_entries
+                  //console.log(entry)
+
+                  if (entry[0] && entry[0].language.name == 'en') {
+                    entry = entry[0]
+                  } else if (entry[1] && entry[1].language.name == 'en') {
+                    entry = entry[1]
+                  } else {
+                    entry = entry[0]
+                  }
+
+                  if (entry && entry.short_effect) {
+                    abilityDesc = entry.short_effect
+                  } else abilityDesc = entry.effect
+                } else abilityDesc = response.data.flavor_text_entries[7].flavor_text
+
+                data.abilities[index].desc = abilityDesc
+                abilitys.push({name: abilityName, desc: abilityDesc})
+              }
+            )
+          }
+
+          pokeAbilitys()
+
+          // if ability was already fetcht, sets the Description from the array - No new API call
+        } else {
+          const description = abilitys.find((element) => element.name == abilityName)
+          //console.log(description)
+          data.abilities[index].desc = description.desc
+        }
+      }
     },
     getNextPokemons() {
       window.onscroll = () => {
         let bottomOfWindow =
           document.documentElement.scrollTop >=
-          document.documentElement.offsetHeight - 2000
+          document.documentElement.offsetHeight - 2500
         if (bottomOfWindow && !this.search && !this.isCallingApi) {
-          this.getPokemonNames(this.scrollLoad, this.pokemons.length)
+          this.getPokemons(this.scrollLoad, this.pokemons.length)
         }
       }
     },
@@ -262,7 +274,7 @@ export default {
     },
   },
   beforeMount() {
-    this.getPokemonNames(this.count, 0)
+    this.getPokemons(this.count, 0)
   },
   mounted() {
     this.getNextPokemons()
