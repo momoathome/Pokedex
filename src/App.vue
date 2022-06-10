@@ -135,6 +135,7 @@ export default {
     isCallingApi: true,
     count: 50,
     scrollLoad: 25,
+    language: 'en',
     search: '',
   }),
   methods: {
@@ -161,13 +162,15 @@ export default {
       EventService.getPokemonData(count, offset)
         .then((response) => {
           const pokemons = response.data.results
-          const pokeDetails = this.getPokeDetails(pokemons)
-          return pokeDetails
+          return this.getPokeDetails(pokemons)
         })
         .then((data) => {
           // End result - by ID sorted Pokemon array with Details, and ability Names + Description
           this.pokemons.push(...data)
           this.isCallingApi = false
+          console.log(this.pokemons)
+          this.setPokemonName()
+
           //console.log(data)
         })
         .catch((error) => {
@@ -185,70 +188,86 @@ export default {
               return response.data
             })
             .then((data) => {
-              //console.log(data)
+              this.getPokemonSpecies(data)
               this.getPokemonAbilityDescription(data)
             })
         }
-        //console.log(pokeDetails)
-
         // sort pokemons with added details - according to pokemon ID
         return pokeDetails.sort((a, b) => a.id - b.id)
       }
-
       return waitForPokeDetails()
+    },
+    async getPokemonSpecies(data) {
+      // prettier-ignore
+      const species = await EventService.getPokemonDetails(data.species.url).then((response) => response.data)
+      // adds all names to the Pokemon Object
+      data.names = species.names
     },
     getPokemonAbilityDescription(data) {
       //console.log(data)
-      const abilitys = this.pokeAbilitys
 
       for (const index in data.abilities) {
         const abilityName = data.abilities[index].ability.name
 
         // checks if the ability from the pokemon was already fetcht
-        const found = abilitys.find((element) => element.name == abilityName)
+        const found = this.pokeAbilitys.find((element) => element.name == abilityName)
 
         // if ability was not already fetcht, fetches the ability Name and Description - New API call
         if (!found) {
-          async function pokeAbilitys() {
-            await EventService.getPokemonDetails(data.abilities[index].ability.url).then(
-              (response) => {
+          const pokeAbilitys = async () => {
+            await EventService.getPokemonDetails(data.abilities[index].ability.url)
+              // prettier-ignore
+              .then((response) => {
                 let abilityDesc
-                let entry
                 //console.log(response.data)
 
-                // finds the englisch Ablity Description
-                // if existing - uses the short Description
+                // finds the english Ability Description
+                // if existing and if the short Description is existing - uses the short Description
+                // else uses the "normal Description"
                 if (response.data.effect_entries.length > 0) {
-                  entry = response.data.effect_entries
+                  let entry = response.data.effect_entries
                   //console.log(entry)
 
-                  if (entry[0] && entry[0].language.name == 'en') {
+                  if (entry[0] && entry[0].language.name == this.language) {
                     entry = entry[0]
-                  } else if (entry[1] && entry[1].language.name == 'en') {
+                  } else if (entry[1] && entry[1].language.name == this.language) {
                     entry = entry[1]
                   } else {
                     entry = entry[0]
                   }
 
-                  if (entry && entry.short_effect) {
+                  if (entry.short_effect) {
                     abilityDesc = entry.short_effect
                   } else abilityDesc = entry.effect
+
+                  // else uses the flavor text - that is also a english Ability Description
                 } else abilityDesc = response.data.flavor_text_entries[7].flavor_text
 
+                // Sets the AbilityDesc in the Pokemon Objekt, to the corresponding Ability
                 data.abilities[index].desc = abilityDesc
-                abilitys.push({name: abilityName, desc: abilityDesc})
-              }
-            )
+                // pushes the Ability and the Desc to the "search" Array -
+                // if the Ability is needed once more, we don't need to fetch the Ability name & desc again
+                this.pokeAbilitys.push({name: abilityName, desc: abilityDesc})
+              })
           }
 
           pokeAbilitys()
 
           // if ability was already fetcht, sets the Description from the array - No new API call
         } else {
-          const description = abilitys.find((element) => element.name == abilityName)
+          // prettier-ignore
+          const description = this.pokeAbilitys.find((element) => element.name == abilityName)
           //console.log(description)
           data.abilities[index].desc = description.desc
         }
+      }
+    },
+    setPokemonName() {
+      for (const pokemon of this.pokemons) {
+        const newPokemonName = pokemon.names.find(
+          (poke) => poke.language.name == this.language
+        )
+        pokemon.name = newPokemonName.name
       }
     },
     getNextPokemons() {

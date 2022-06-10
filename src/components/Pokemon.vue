@@ -300,7 +300,7 @@ export default {
   display: flex;
   justify-content: center;
   align-self: center;
-  font-size: 11.5px;
+  font-size: 11px;
   font-weight: bold;
   padding-block: 4px;
   background: linear-gradient(135deg, #bf953f, #fcf6ba, #aa771c);
