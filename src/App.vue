@@ -1,11 +1,18 @@
 <template>
-  <main class="container">
-    <label for="pokemon" class="pokemonSearch">
-      <input type="text" id="pokemonSearch" v-model="search" placeholder="&nbsp;" />
-      <span class="label">Search Pokemon ({{ pokemons.length }}) </span>
-      <span class="focus-bg"></span>
-    </label>
+  <div class="searchbar">
+    <div class="inner-search">
+      <label for="pokemon" class="pokemonSearch">
+        <input type="text" id="pokemonSearch" v-model="search" placeholder="&nbsp;" />
+        <span class="label">
+          <img class="search-lens" :src="'assets/magnifying-glass-solid.svg'" alt="" />
+          Search Pokemon ({{ pokemons.length }})
+        </span>
+        <span class="focus-bg"></span>
+      </label>
+    </div>
+  </div>
 
+  <main class="container">
     <div class="grid">
       <Pokemon
         v-for="pokemon in filteredPokemon"
@@ -133,8 +140,8 @@ export default {
     hexTypes: [],
     showModal: false,
     isCallingApi: true,
-    count: 50,
-    scrollLoad: 25,
+    count: 100,
+    scrollLoad: 50,
     language: 'en',
     search: '',
   }),
@@ -150,10 +157,10 @@ export default {
       if (this.pokemons.length >= 1126) {
         return
       }
-      /*  // One time after first 151 Pokekom (generation 1) get 1 fewer to fill the line in the Grid
+      // One time after first 151 Pokekom (generation 1) get 1 fewer to fill the line in the Grid
       if (this.pokemons.length === this.count && this.count === 151) {
         count = count - 1
-      } */
+      }
 
       // show Skeleton loading animation during Api call
       this.isCallingApi = true
@@ -168,7 +175,6 @@ export default {
           // End result - by ID sorted Pokemon array with Details, and ability Names + Description
           this.pokemons.push(...data)
           this.isCallingApi = false
-          console.log(this.pokemons)
           this.setPokemonName()
 
           //console.log(data)
@@ -218,10 +224,12 @@ export default {
             await EventService.getPokemonDetails(data.abilities[index].ability.url)
               // prettier-ignore
               .then((response) => {
+                data.abilities[index].names = response.data.names
+
                 let abilityDesc
                 //console.log(response.data)
 
-                // finds the english Ability Description
+                // finds the Ability Description equal to this.language
                 // if existing and if the short Description is existing - uses the short Description
                 // else uses the "normal Description"
                 if (response.data.effect_entries.length > 0) {
@@ -270,6 +278,14 @@ export default {
         pokemon.name = newPokemonName.name
       }
     },
+    setAbilityDisplayName() {
+      for (const pokemon of this.pokemons) {
+        const newAbilityDisplayName = pokemon.abilities.find(
+          (poke) => poke.language.name == this.language
+        )
+        pokemon.ability_display_name = newAbilityDisplayName.name
+      }
+    },
     getNextPokemons() {
       window.onscroll = () => {
         let bottomOfWindow =
@@ -315,7 +331,6 @@ export default {
   flex-direction: column;
   justify-content: center;
   margin: auto;
-  padding-top: 4rem;
 }
 .content {
   margin-bottom: 4rem;
@@ -336,80 +351,88 @@ export default {
   margin-top: 4rem;
 }
 
-$primary: #800000;
-$dark: #000;
+$primary: rgb(128, 0, 0);
+$dark: rgb(0, 0, 0);
+$background: rgb(255, 255, 255);
 
-.pokemonSearch {
-  position: relative;
-  margin: 0 auto 3rem auto;
+.searchbar {
+  position: sticky;
+  top: 0;
   width: 100%;
-  max-width: 500px;
-  border-radius: 3px;
-  overflow: hidden;
+  z-index: 9999;
+  margin-bottom: 6.5rem;
+  background-color: $background;
+  box-shadow: 0 2px 16px 2px rgba(0, 0, 0, 0.1);
 
-  .label {
-    position: absolute;
-    top: 20px;
-    left: 12px;
-    font-size: 16px;
-    color: rgba($dark, 0.5);
-    font-weight: 500;
-    transform-origin: 0 0;
-    transform: translate3d(0, 0, 0);
-    transition: all 0.2s ease;
-    pointer-events: none;
+  .inner-search {
+    display: flex;
+    justify-content: center;
   }
 
-  .focus-bg {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba($dark, 0.05);
-    z-index: -1;
-    transform: scaleX(0);
-    transform-origin: left;
+  .search-lens {
+    width: 16px;
+    height: 16px;
   }
 
-  input {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 100%;
-    border: 0;
-    font-family: inherit;
-    padding: 16px 12px 0 12px;
-    height: 56px;
-    font-size: 16px;
-    font-weight: 400;
-    background: rgba($dark, 0.02);
-    box-shadow: inset 0 -1px 0 rgba($dark, 0.3);
-    color: $dark;
-    transition: all 0.15s ease;
+  .pokemonSearch {
+    position: relative;
+    border-radius: 3px;
+    overflow: hidden;
 
-    &:hover {
-      background: rgba($dark, 0.04);
-      box-shadow: inset 0 -1px 0 rgba($dark, 0.5);
+    .label {
+      position: absolute;
+      top: 20px;
+      left: 12px;
+      font-size: 16px;
+      color: rgba($dark, 0.5);
+      font-weight: 500;
+      transform-origin: 0 0;
+      transform: translate3d(0, 0, 0);
+      transition: all 0.2s ease;
+      pointer-events: none;
     }
 
-    &:not(:placeholder-shown) {
-      .label {
-        color: rgba($dark, 0.5);
-        transform: translate3d(0, -12px, 0) scale(0.75);
-      }
+    .focus-bg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      transform: scaleX(0);
+      transform-origin: left;
     }
 
-    &:focus {
-      background: rgba($dark, 0.05);
-      outline: none;
-      box-shadow: inset 0 -2px 0 $primary;
-      + .label {
-        color: $primary;
-        transform: translate3d(0, -12px, 0) scale(0.75);
+    input {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 500px;
+      border: 0;
+      font-family: inherit;
+      padding: 16px 12px 0 12px;
+      height: 56px;
+      font-size: 16px;
+      font-weight: 400;
+      color: $dark;
+      transition: all 0.15s ease;
+
+      &:not(:placeholder-shown) {
+        .label {
+          color: rgba($dark, 0.5);
+          transform: translate3d(0, -12px, 0) scale(0.75);
+        }
       }
-      + .focus-bg {
-        transform: scaleX(1);
-        transition: all 0.1s ease;
+
+      &:focus {
+        outline: none;
+        + .label {
+          color: $primary;
+          transform: translate3d(0, -12px, 0) scale(0.75);
+        }
+        + .focus-bg {
+          transform: scaleX(1);
+          transition: all 0.1s ease;
+        }
       }
     }
   }
