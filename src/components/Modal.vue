@@ -1,40 +1,115 @@
 <template>
   <Transition name="modal">
-    <div v-if="show" class="modal-mask">
       <div class="modal-wrapper">
         <div class="modal-container" :style="createMainBackground">
           <button class="btn-close" @click="$emit('close')">X</button>
 
           <div class="modal-content">
             <div class="poke-modal-header">
-              <slot name="poke-head"></slot>
+              <div class="poke-head">
+                <div class="poke-name">
+                  <h3 class="pokemon-name-large">{{ pokemon.name }}</h3>
+                  <span class="poke-id-large">No.{{ pokemon.id }}</span>
+                </div>
+                <div class="poke-head-info">
+                  <div class="poke-kp">{{ pokemon.stats[0].base_stat }} <span>KP</span></div>
+                  <div class="poke-element-icon">
+                    <img :src="'assets/' + setElementIcon" alt="" />
+                  </div>
+                </div>
+              </div>
             </div>
 
-            <slot name="poke-body"></slot>
+            <div class="poke-body">
+              <div class="modal-img">
+                <div class="poke-img-container">
+                  <div class="poke-img poke-front">
+                    <img :src="pokemon.sprites.front_default" class="img-large" />
+                  </div>
+                  <div class="poke-img poke-back">
+                    <img :src="pokemon.sprites.front_shiny" class="img-large" />
+                  </div>
+                </div>
+              </div>
+           </div>
 
-            <slot name="poke-footer"></slot>
+              <div class="poke-footer">
+                <div class="poke-details modal-details">
+                  <span>Height: {{ pokemon.height / 10 }}m </span>,<span
+                    >Weight: {{ pokemon.weight / 10 }}kg
+                  </span>
+                </div>
+                <div class="poke-abilities modal-abilities">
+                  <div class="poke-ability">
+                    {{ pokemon.abilities[0].ability.name }}
+                    <span v-if="pokemon.abilities[0].desc" class="poke-ability-desc"
+                      >{{ pokemon.abilities[0].desc }}
+                    </span>
+                  </div>
+                  <div class="poke-ability" v-if="pokemon.abilities[1]">
+                    {{ pokemon.abilities[1].ability.name }}
+                    <span v-if="pokemon.abilities[1].desc" class="poke-ability-desc"
+                      >{{ pokemon.abilities[1].desc }}
+                    </span>
+                  </div>
+                </div>
+              </div>
           </div>
 
-          <slot name="poke-evolution"></slot>
+          
+          <div class="evolution-chain">
+            <div v-if="pokemon.evolution_base">
+              <img
+                :src="pokemon.evolution_base.sprites.front_default"
+                class="evolution-img"
+              />
+              <p>{{ pokemon.evolution_base.name }}</p>
+            </div>
+            <template v-if="pokemon.evolution_advanced">
+              <EvolutionArrow />
+            </template>
+            <div v-if="pokemon.evolution_advanced">
+              <img
+                :src="pokemon.evolution_advanced.sprites.front_default"
+                class="evolution-img"
+              />
+              <p>{{ pokemon.evolution_advanced.name }}</p>
+            </div>
+            <template v-if="pokemon.evolution_expert">
+              <EvolutionArrow />
+            </template>
+            <div v-if="pokemon.evolution_expert">
+              <img
+                :src="pokemon.evolution_expert.sprites.front_default"
+                class="evolution-img"
+              />
+              <p>{{ pokemon.evolution_expert.name }}</p>
+            </div>
+          </div>
+
         </div>
       </div>
-    </div>
   </Transition>
 </template>
 
-<script>
-export default {
-  props: {
-    show: Boolean,
-    types: Array,
-  },
-  computed: {
-    createMainBackground() {
-      const type = this.types
-      return `background: linear-gradient(315deg, ${type[0]} 0%, ${type[1]} 74%)`
-    },
-  },
-}
+<script setup lang="ts">
+import { computed, ref } from 'vue'
+import EvolutionArrow from './EvolutionArrow.vue'
+
+const props = defineProps({
+  pokeTypes: Array,
+  pokemon: Object,
+})
+
+const setElementIcon = computed(() => {
+  const type = props.pokemon!.types[0].type.name
+  return `Pokemon_${type}_Type_Icon.svg`
+})
+
+const createMainBackground = computed(() => {
+  const type = props.pokeTypes
+  return `background: linear-gradient(315deg, ${type![0]} 0%, ${type![1]} 74%)`
+})
 </script>
 
 <style lang="scss">

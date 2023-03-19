@@ -4,8 +4,7 @@
       <label for="pokemon" class="pokemonSearch">
         <input type="text" id="pokemonSearch" v-model="search" placeholder="&nbsp;" />
         <span class="label">
-          <img class="search-lens" :src="'assets/magnifying-glass-solid.svg'" alt="" />
-          Search Pokemon ({{ pokemons.length }})
+          <img class="search-lens" :src="'assets/magnifying-glass-solid.svg'" alt="" />Search Pokemon ({{ pokemons.length }})
         </span>
         <span class="focus-bg"></span>
       </label>
@@ -28,93 +27,9 @@
   </main>
 
   <Teleport to="#modal">
-    <modal :show="showModal" @close="showModal = false" :types="hexTypes">
-      <template #poke-head>
-        <div class="poke-head">
-          <div class="poke-name">
-            <h3 class="pokemon-name-large">{{ pokemon.name }}</h3>
-            <span class="poke-id-large">No.{{ pokemon.id }}</span>
-          </div>
-          <div class="poke-head-info">
-            <div class="poke-kp">{{ pokemon.stats[0].base_stat }} <span>KP</span></div>
-            <div class="poke-element-icon">
-              <img :src="'assets/' + setElementIcon" alt="" />
-            </div>
-          </div>
-        </div>
-      </template>
-
-      <template #poke-body>
-        <div class="poke-body">
-          <div class="modal-img">
-            <div class="poke-img-container">
-              <div class="poke-img poke-front">
-                <img :src="pokemon.sprites.front_default" class="img-large" />
-              </div>
-              <div class="poke-img poke-back">
-                <img :src="pokemon.sprites.front_shiny" class="img-large" />
-              </div>
-            </div>
-          </div>
-        </div>
-      </template>
-
-      <template #poke-footer>
-        <div class="poke-footer">
-          <div class="poke-details modal-details">
-            <span>Height: {{ pokemon.height / 10 }}m </span>,<span
-              >Weight: {{ pokemon.weight / 10 }}kg
-            </span>
-          </div>
-          <div class="poke-abilities modal-abilities">
-            <div class="poke-ability">
-              {{ pokemon.abilities[0].ability.name }}
-              <span v-if="pokemon.abilities[0].desc" class="poke-ability-desc"
-                >{{ pokemon.abilities[0].desc }}
-              </span>
-            </div>
-            <div class="poke-ability" v-if="pokemon.abilities[1]">
-              {{ pokemon.abilities[1].ability.name }}
-              <span v-if="pokemon.abilities[1].desc" class="poke-ability-desc"
-                >{{ pokemon.abilities[1].desc }}
-              </span>
-            </div>
-          </div>
-        </div>
-      </template>
-
-      <template #poke-evolution>
-        <div class="evolution-chain">
-          <div v-if="pokemon.evolution_base">
-            <img
-              :src="pokemon.evolution_base.sprites.front_default"
-              class="evolution-img"
-            />
-            <p>{{ pokemon.evolution_base.name }}</p>
-          </div>
-          <template v-if="pokemon.evolution_advanced">
-            <EvolutionArrow />
-          </template>
-          <div v-if="pokemon.evolution_advanced">
-            <img
-              :src="pokemon.evolution_advanced.sprites.front_default"
-              class="evolution-img"
-            />
-            <p>{{ pokemon.evolution_advanced.name }}</p>
-          </div>
-          <template v-if="pokemon.evolution_expert">
-            <EvolutionArrow />
-          </template>
-          <div v-if="pokemon.evolution_expert">
-            <img
-              :src="pokemon.evolution_expert.sprites.front_default"
-              class="evolution-img"
-            />
-            <p>{{ pokemon.evolution_expert.name }}</p>
-          </div>
-        </div>
-      </template>
-    </modal>
+    <div v-if="showModal" class="modal-mask">
+      <modal @close="showModal = false" :pokeTypes="hexTypes" :pokemon="pokemon"></modal>
+    </div>
   </Teleport>
 </template>
 <script>
@@ -123,7 +38,6 @@ import EventService from './services/EventService'
 import Modal from './components/Modal.vue'
 import Skeleton from './components/Skeleton.vue'
 import ButtonToTop from './components/ButtonToTop.vue'
-import EvolutionArrow from './components/EvolutionArrow.vue'
 
 export default {
   components: {
@@ -131,7 +45,6 @@ export default {
     Modal,
     Skeleton,
     ButtonToTop,
-    EvolutionArrow,
   },
   data: () => ({
     pokemons: [],
@@ -140,8 +53,8 @@ export default {
     hexTypes: [],
     showModal: false,
     isCallingApi: true,
-    count: 100,
-    scrollLoad: 50,
+    count: 50,
+    scrollLoad: 25,
     language: 'en',
     search: '',
   }),
@@ -302,10 +215,6 @@ export default {
       return this.pokemons.filter((poke) => {
         return poke.name.toLowerCase().indexOf(this.search.toLowerCase()) != -1
       })
-    },
-    setElementIcon() {
-      const type = this.pokemon.types[0].type.name
-      return `Pokemon_${type}_Type_Icon.svg`
     },
   },
   beforeMount() {
