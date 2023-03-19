@@ -53,8 +53,8 @@ export default {
     hexTypes: [],
     showModal: false,
     isCallingApi: true,
-    count: 50,
-    scrollLoad: 25,
+    count: 151,
+    scrollLoad: 50,
     language: 'en',
     search: '',
   }),
@@ -67,7 +67,7 @@ export default {
     },
     getPokemons(count, offset) {
       // No new API calls after "max Pokemon count" in API Data
-      if (this.pokemons.length >= 1126) {
+      if (this.pokemons.length >= 1281) {
         return
       }
       // One time after first 151 Pokekom (generation 1) get 1 fewer to fill the line in the Grid
@@ -89,8 +89,6 @@ export default {
           this.pokemons.push(...data)
           this.isCallingApi = false
           this.setPokemonName()
-
-          //console.log(data)
         })
         .catch((error) => {
           console.log(error)
@@ -162,7 +160,10 @@ export default {
                   } else abilityDesc = entry.effect
 
                   // else uses the flavor text - that is also a english Ability Description
+                } else if(response.data.effect_entries.length <= 0) {
+                  abilityDesc = "no ability description"
                 } else abilityDesc = response.data.flavor_text_entries[7].flavor_text
+
 
                 // Sets the AbilityDesc in the Pokemon Objekt, to the corresponding Ability
                 data.abilities[index].desc = abilityDesc
@@ -184,11 +185,12 @@ export default {
       }
     },
     setPokemonName() {
+
       for (const pokemon of this.pokemons) {
-        const newPokemonName = pokemon.names.find(
-          (poke) => poke.language.name == this.language
-        )
+        if (pokemon.names !== undefined) {
+        const newPokemonName = pokemon.names.find((poke) => poke.language.name == this.language)
         pokemon.name = newPokemonName.name
+        } 
       }
     },
     setAbilityDisplayName() {
@@ -260,6 +262,8 @@ export default {
   margin-top: 4rem;
 }
 
+
+/* Searchbar */
 $primary: rgb(128, 0, 0);
 $dark: rgb(0, 0, 0);
 $background: rgb(255, 255, 255);

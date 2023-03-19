@@ -2,8 +2,8 @@
   <div class="poke-card" @click="showModal(pokemon)" :style="createMainBackground">
     <div class="poke-head">
       <div class="poke-name">
-        <h3 v-if="pokemon.id < 10000">{{ pokemon.name }}</h3>
-        <h3 v-else class="pokemon-name-small">{{ pokemon.name }}</h3>
+        <h3 v-if="pokemon.is_default">{{ pokemon.name }}</h3>
+        <h3 v-else class="pokemon-name-small">{{ pokemon.forms[0].name }}</h3>
         <span class="poke-id">No.{{ pokemon.id }}</span>
       </div>
       <div class="poke-head-info">
@@ -41,6 +41,7 @@
         </div>
       </div>
     </div>
+
   </div>
 </template>
 
@@ -53,7 +54,7 @@ export default {
     pokemon: Object,
   },
   data: () => ({
-    descriptionLength: 10,
+    descriptionLengthInWords: 10,
     types: {
       normal: ['#b8c6db', '#f5f7fa'],
       fire: ['#a40606', '#d98324'],
@@ -102,37 +103,31 @@ export default {
       const evolutionChain = await this.getPokemonDetails(url)
 
       try {
-        const first = await this.getPokemonDetails(evolutionChain.chain.species.url)
-        const first_details = await this.getPokemonById(first.id)
+        const pokemonEvolution = await this.getPokemonDetails(evolutionChain.chain.species.url)
+        const details = await this.getPokemonById(pokemonEvolution.id)
+        this.pokemon.evolution_base = details
 
-        this.pokemon.evolution_base = first_details
       } catch (error) {
         this.pokemon.evolution_base = this.pokemon
       }
 
       try {
-        const second = await this.getPokemonDetails(
-          evolutionChain.chain.evolves_to[0].species.url
-        )
-        const second_details = await this.getPokemonById(second.id)
+        const pokemonEvolution = await this.getPokemonDetails(evolutionChain.chain.evolves_to[0].species.url)
+        const details = await this.getPokemonById(pokemonEvolution.id)
+        this.pokemon.evolution_advanced = details
 
-        this.pokemon.evolution_advanced = second_details
       } catch (error) {
         this.pokemon.evolution_advanced = null
       }
 
       try {
-        const third = await this.getPokemonDetails(
-          evolutionChain.chain.evolves_to[0].evolves_to[0].species.url
-        )
-        const third_details = await this.getPokemonById(third.id)
-
-        this.pokemon.evolution_expert = third_details
+        const pokemonEvolution = await this.getPokemonDetails(evolutionChain.chain.evolves_to[0].evolves_to[0].species.url)
+        const details = await this.getPokemonById(pokemonEvolution.id)
+        this.pokemon.evolution_expert = details
+        
       } catch (error) {
         this.pokemon.evolution_expert = null
       }
-
-      console.log(this.pokemon)
     },
     shortenDescription(index) {
       const description = this.pokemon.abilities[index].desc
@@ -143,19 +138,22 @@ export default {
         .filter((el) => el !== '\n')
         .filter((word) => word !== '')
 
-      if (words.length > this.descriptionLength) {
-        const newDesc = words.slice(0, this.descriptionLength).join(' ') + '...'
+      if (words.length > this.descriptionLengthInWords) {
+        const newDesc = words.slice(0, this.descriptionLengthInWords).join(' ') + '...'
         //console.log(newDesc)
         return newDesc
       } else {
         return description
       }
     },
+    setPokemonTypeHexValues(type) {
+      this.pokemon.types[0].type.hex = type
+    }
   },
   computed: {
     createMainBackground() {
       const type = this.types[this.pokemon.types[0].type.name]
-      this.pokemon.types[0].type.hex = type
+      this.setPokemonTypeHexValues(type)
       return `background: linear-gradient(315deg, ${type[0]} 0%, ${type[1]} 74%)`
     },
     setElementIcon() {

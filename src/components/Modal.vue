@@ -93,7 +93,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed } from 'vue'
 import EvolutionArrow from './EvolutionArrow.vue'
 
 const props = defineProps({
@@ -107,9 +107,10 @@ const setElementIcon = computed(() => {
 })
 
 const createMainBackground = computed(() => {
-  const type = props.pokeTypes
+  const type = props.pokemon!.types[0].type.hex
   return `background: linear-gradient(315deg, ${type![0]} 0%, ${type![1]} 74%)`
 })
+
 </script>
 
 <style lang="scss">
